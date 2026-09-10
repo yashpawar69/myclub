@@ -12,5 +12,6 @@ urlpatterns = [
          name='home',
          ),
     path('events/', views.all_events, name='list_events'),
+    path('add_venue', views.add_venue, name='add_venue'),
     
 ]
