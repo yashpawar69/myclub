@@ -22,11 +22,11 @@ class MyClubUser(models.Model):
         return self.first_name+' '+self.last_name 
     
 class Event(models.Model):
-    title = models.CharField('event title',max_length=200)
+    name = models.CharField('event title',max_length=200)
     description = models.TextField(blank=True,null=True)
     host = models.ForeignKey(User,blank=True,null=True,on_delete=models.SET_NULL)
-    date = models.DateField("event date")
-    venue_object = models.ForeignKey(Venue,blank=True,null=True, on_delete=models.CASCADE)
+    event_date = models.DateField("event date")
+    venue = models.ForeignKey(Venue,blank=True,null=True, on_delete=models.CASCADE)
     attendees = models.ManyToManyField(MyClubUser, blank=True)
 
     def __str__(self):
