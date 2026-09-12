@@ -2,22 +2,33 @@ from django.shortcuts import render
 import calendar
 from calendar import HTMLCalendar
 from datetime import datetime
-from .models  import Event
+from .models  import Event, Venue
 
 from .forms import VenueForm
 from django.http import HttpResponseRedirect
 
 # Create your views here.
 
+def show_venue(request, venue_id):
+  venue = Venue.objects.get(pk=venue_id)
+  return render(request, 'events/show_venue.html',
+                {'venue':venue})
+def list_venue(request):
+  venue_list = Venue.objects.all()
+  return render(request, 'events/venue.html',
+                {'venue_list': venue_list})
+
 def add_venue(request):
 	submitted = False
 	if request.method == "POST":
-		form = VenueForm(request.POST, request.FILES)
+		form = VenueForm(request.POST,
+				    # request.FILES
+			)
 		if form.is_valid():
-			venue = form.save(commit=False)
-			venue.owner = request.user.id # logged in user
-			venue.save()
-			#form.save()
+			# venue = form.save(commit=False)
+			# venue.owner = request.user.id # logged in user
+			# venue.save()
+			form.save()
 			return 	HttpResponseRedirect('/add_venue?submitted=True')	
 	else:
 		form = VenueForm
