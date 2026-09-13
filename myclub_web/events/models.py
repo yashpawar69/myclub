@@ -30,5 +30,5 @@ class Event(models.Model):
     attendees = models.ManyToManyField(MyClubUser, blank=True)
 
     def __str__(self):
-        return self.title
+        return self.name
     
