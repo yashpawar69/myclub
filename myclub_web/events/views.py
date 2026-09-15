@@ -8,6 +8,21 @@ from .forms import VenueForm
 from django.http import HttpResponseRedirect
 
 # Create your views here.
+
+def search_venues(request):
+	if request.method == "POST":
+		searched = request.POST['searched']
+		venues = Venue.objects.filter(name__contains=searched)
+	
+		return render(request, 
+		'events/search_venues.html', 
+		{'searched':searched,
+		'venues':venues})
+	else:
+		return render(request, 
+		'events/search_venues.html', 
+		{})
+
 def show_venue(request, venue_id):
 	venue = Venue.objects.get(pk=venue_id)
 	# venue_owner = User.objects.get(pk=venue.owner)
