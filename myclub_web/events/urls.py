@@ -13,7 +13,8 @@ urlpatterns = [
     path('events/', views.all_events, name='list_events'),
     path('add_venue', views.add_venue, name='add_venue'),
     path('list_venue', views.list_venue, name='list-venue'),
-    path('venue_show/<venue_id>', views.show_venue, name='show_venue'),
+    path('show_venue/<venue_id>', views.show_venue, name='show_venue'),
+    path('update_venue/<venue_id>', views.update_venue, name='update-venue'),
     path('search_venues', views.search_venues, name='search-venues'),
 
     
