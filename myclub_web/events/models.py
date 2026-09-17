@@ -24,7 +24,7 @@ class MyClubUser(models.Model):
 class Event(models.Model):
     name = models.CharField('event title',max_length=200)
     description = models.TextField(blank=True,null=True)
-    host = models.ForeignKey(User,blank=True,null=True,on_delete=models.SET_NULL)
+    manager = models.ForeignKey(User,blank=True,null=True,on_delete=models.SET_NULL)
     event_date = models.DateField("event date")
     venue = models.ForeignKey(Venue,blank=True,null=True, on_delete=models.CASCADE)
     attendees = models.ManyToManyField(MyClubUser, blank=True)
