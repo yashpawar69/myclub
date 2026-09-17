@@ -1,25 +1,60 @@
 {% extends 'events/base.html' %}
 
-
 {% block content %}
-<h1>Upcoming events</h1>
-<ul>
-    {% for event in event_list %}
 
-    
-        <strong> {{ event.name }} </strong>
-        <li>Date:{{ event.event_date }}</li>
-        <li>Discription:{{ event.description }}</li>
-        <li>Host:{{ event.host }}</li>
-        <li>Venue:{{ event.venue }}</li>
+<h1>Upcoming Events</h1>
 
-        <li>Attendees:
-            {% for user in event.attendees.all %}
-            {{ user }}
-            {% endfor %}
-        </li>
-    {% endfor %}
-</ul>
+{% for event in event_list %}
 
+<div class="card mb-3">
+
+    <div class="card-header">
+        {{ event.name }}
+    </div>
+
+    <div class="card-body">
+
+        <h5 class="card-title">
+            Venue: {{ event.venue }}
+        </h5>
+
+        <p class="card-text">
+
+            <strong>{{ event.name }}</strong>
+
+        </p>
+
+        <ul>
+            <li>Date: {{ event.event_date }}</li>
+            <li>Description: {{ event.description }}</li>
+            <li>Host: {{ event.host }}</li>
+            <li>Venue: {{ event.venue }}</li>
+
+            <li>
+                Attendees:
+                {% for user in event.attendees.all %}
+                    {{ user }}
+                {% endfor %}
+            </li>
+        </ul>
+
+        <a href="{% url 'update-event' event.id %}"
+           class="btn btn-outline-secondary btn-sm">
+            Update Event
+        </a>
+        <a href="{% url 'delete-event' event.id %}"
+           class="btn btn-outline-danger btn-sm">
+            Delete Event
+        </a>
+
+    </div>
+
+    <div class="card-footer text-muted">
+        Event ID: {{ event.id }}
+    </div>
+
+</div>
+
+{% endfor %}
 
 {% endblock %}
