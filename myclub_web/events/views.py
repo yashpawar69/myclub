@@ -6,7 +6,52 @@ from .models  import Event, Venue
 
 from .forms import VenueForm, EventForm, EventFormAdmin
 from django.http import HttpResponseRedirect, HttpResponse
+import csv
+#for pdf 
+from django.http import FileResponse
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import letter
 
+
+#gen pdf file
+
+def venue_pdf(request):
+	response = HttpResponse(content_type='application/pdf')
+	response['Content-Disposition'] = 'attachment; filename="venues.pdf"'
+	buffer = io.BytesIO()
+	p = canvas.Canvas(buffer, pagesize=letter, bottomup=0)
+	textob = p.beginText()
+	textob.setTextOrigin(inch, inch)
+	textob.setFont("Helvetica", 14)
+
+	lines = []
+	for venue in Venue.objects.all().order_by('name'):
+		lines.append(venue.name)
+		lines.append(venue.address)
+		lines.append(venue.phone)
+		lines.append(venue.website)
+		lines.append(venue.state)
+		lines.append(" ")
+	for line in lines:
+		textob.textLine(line)
+	p.drawText(textob)
+	p.showPage()
+	p.save()
+	buffer.seek(0)
+
+	return FileResponse(buffer,as_attachment=True,filename=venue_pdf)
+
+# gen csv file
+def venue_csv(request):
+	response = HttpResponse(content_type='text/csv')
+	response['Content-Disposition'] = 'attachment; filename="venues.csv"'
+	writer = csv.writer(response)
+	writer.writerow(['Venue Name', 'Venue Address', 'Venue Phone', 'Venue Website', 'Venue State'])
+	for venue in Venue.objects.all().order_by('name'):
+		writer.writerow([venue.name, venue.address, venue.phone, venue.website, venue.state])
+	return response
 
 
 #generate text file venue list
