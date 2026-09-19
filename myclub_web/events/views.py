@@ -14,34 +14,54 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 
+# pagination stuff
+
+from django.core.paginator import Paginator
 
 #gen pdf file
 
 def venue_pdf(request):
-	response = HttpResponse(content_type='application/pdf')
-	response['Content-Disposition'] = 'attachment; filename="venues.pdf"'
-	buffer = io.BytesIO()
-	p = canvas.Canvas(buffer, pagesize=letter, bottomup=0)
-	textob = p.beginText()
+	# Create Bytestream buffer
+	buf = io.BytesIO()
+	# Create a canvas
+	c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+	# Create a text object
+	textob = c.beginText()
 	textob.setTextOrigin(inch, inch)
 	textob.setFont("Helvetica", 14)
 
+	# Add some lines of text
+	#lines = [
+	#	"This is line 1",
+	#	"This is line 2",
+	#	"This is line 3",
+	#]
+	
+	# Designate The Model
+	venues = Venue.objects.all()
+
+	# Create blank list
 	lines = []
-	for venue in Venue.objects.all().order_by('name'):
+
+	for venue in venues:
 		lines.append(venue.name)
 		lines.append(venue.address)
+		lines.append(venue.zip_code)
 		lines.append(venue.phone)
 		lines.append(venue.website)
-		lines.append(venue.state)
 		lines.append(" ")
+
+	# Loop
 	for line in lines:
 		textob.textLine(line)
-	p.drawText(textob)
-	p.showPage()
-	p.save()
-	buffer.seek(0)
 
-	return FileResponse(buffer,as_attachment=True,filename=venue_pdf)
+	# Finish Up
+	c.drawText(textob)
+	c.showPage()
+	c.save()
+	buf.seek(0)
+
+	return FileResponse(buf,as_attachment=True,filename='venue.pdf')
 
 # gen csv file
 def venue_csv(request):
@@ -164,8 +184,13 @@ def show_venue(request, venue_id):
 
 def list_venue(request):
   venues = Venue.objects.all()
+
+  p = Paginator(venues, 2)
+  page = request.GET.get('page')
+  venues_page = p.get_page(page)
   return render(request, 'events/venue.html',
-                {'venues': venues})
+                {'venues': venues
+				 , 'venues_page': venues_page})
 
 def add_venue(request):
 	submitted = False
