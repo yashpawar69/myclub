@@ -7,9 +7,9 @@ urlpatterns = [
     #path converters
     #slug = hyphens and underscores
     #path = urls
-    path('date', views.home, name='date'),
+    path('home', views.home, name='home'),
     path('<int:year>/<str:month>/', views.home, 
-         name='home', ),
+         name='date', ),
     path('list_events', views.all_events, name='list_events'),
     path('add_venue', views.add_venue, name='add_venue'),
     path('add_event', views.add_event, name='add_event'),
