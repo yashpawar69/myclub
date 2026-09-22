@@ -4,6 +4,7 @@ from calendar import HTMLCalendar
 from datetime import datetime
 from .models  import Event, Venue
 
+from django.contrib.auth.models import User
 from .forms import VenueForm, EventForm, EventFormAdmin
 from django.http import HttpResponseRedirect, HttpResponse
 import csv
@@ -13,6 +14,7 @@ import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
+from django.contrib import messages  # Import messages
 
 # pagination stuff
 
@@ -91,58 +93,57 @@ def delete_venue(request, venue_id):
 
 def delete_event(request, event_id):
 	event = Event.objects.get(pk=event_id)
-	event.delete()
-	return redirect('list_events')
-
+	if request.user == event.manager:
+		event.delete()
+		messages.success(request, ("Event Deleted!!"))
+		return redirect('list-events')		
+	else:
+		messages.success(request, ("You Aren't Authorized To Delete This Event!"))
+		return redirect('list-events')		
 
 def add_event(request):
-    submitted = False
+	submitted = False
+	if request.method == "POST":
+		if request.user.is_superuser:
+			form = EventFormAdmin(request.POST)
+			if form.is_valid():
+					form.save()
+					return 	HttpResponseRedirect('/add_event?submitted=True')	
+		else:
+			form = EventForm(request.POST)
+			if form.is_valid():
+				#form.save()
+				event = form.save(commit=False)
+				event.manager = request.user # logged in user
+				event.save()
+				return 	HttpResponseRedirect('/add_event?submitted=True')	
+	else:
+		# Just Going To The Page, Not Submitting 
+		if request.user.is_superuser:
+			form = EventFormAdmin
+		else:
+			form = EventForm
 
-    if request.method == "POST":
+		if 'submitted' in request.GET:
+			submitted = True
 
-        # if request.user.is_superuser:
-        #     form = EventFormAdmin(request.POST)
+	return render(request, 'events/add_event.html', {'form':form, 'submitted':submitted})
 
-        #     if form.is_valid():
-        #         form.save()
-        #         return HttpResponseRedirect('/add_event/?submitted=True')
-
-        # else:
-            form = EventForm(request.POST)
-
-            if form.is_valid():
-                event = form.save(commit=False)
-                event.manager = request.user
-                event.save()
-
-                return HttpResponseRedirect('/add_event?submitted=True')
-
-    else:
-
-        if request.user.is_superuser:
-            form = EventFormAdmin()
-        else:
-            form = EventForm()
-
-        if 'submitted' in request.GET:
-            submitted = True
-
-    return render(
-        request,
-        'events/add_event.html',
-        {
-            'form': form,
-            'submitted': submitted
-        }
-    )
 def update_event(request, event_id):
 	event = Event.objects.get(pk=event_id)
-	form = EventForm(request.POST or None, instance=event)
+	if request.user.is_superuser:
+		form = EventFormAdmin(request.POST or None, instance=event)	
+
+	else:
+		form = EventForm(request.POST or None, instance=event)
+	
 	if form.is_valid():
 		form.save()
-		return redirect('list_events')
-	return render(request, 'events/update_event.html', {'event':event, 'form':form})
+		return redirect('list-events')
 
+	return render(request, 'events/update_event.html', 
+		{'event': event,
+		'form':form})
 
 def update_venue(request, venue_id):
 	venue = Venue.objects.get(pk=venue_id)
@@ -172,14 +173,14 @@ def search_venues(request):
 
 def show_venue(request, venue_id):
 	venue = Venue.objects.get(pk=venue_id)
-	# venue_owner = User.objects.get(pk=venue.owner)
+	venue_owner = User.objects.get(pk=venue.owner)
 
 	# Grab the events from that venue
 	events = venue.event_set.all()
 
 	return render(request, 'events/show_venue.html', 
 		{'venue': venue,
-		# 'venue_owner':venue_owner,
+		'venue_owner':venue_owner,
 		'events':events})
 
 def list_venue(request):
@@ -196,7 +197,7 @@ def add_venue(request):
 	submitted = False
 	if request.method == "POST":
 		form = VenueForm(request.POST,
-				    # request.FILES
+				    request.FILES
 			)
 		if form.is_valid():
 			venue = form.save(commit=False)
