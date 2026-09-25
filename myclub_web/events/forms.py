@@ -50,7 +50,7 @@ class EventForm(ModelForm):
 class VenueForm(ModelForm):
 	class Meta:
 		model = Venue
-		fields = ('name', 'address', 'zip_code', 'phone', 'website', 'email', 'owner')
+		fields = ('name', 'address', 'zip_code', 'phone', 'website', 'email','venue_image')
 		labels = {
 			'name': '',
 			'address': '',
@@ -58,7 +58,6 @@ class VenueForm(ModelForm):
 			'phone': '',
 			'website': '',
 			'email': '',
-			'owner': '',
 			'venue_image': '',
 		}
 		widgets = {
@@ -68,6 +67,4 @@ class VenueForm(ModelForm):
 			'phone': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Phone'}),
 			'website': forms.TextInput(attrs={'class':'form-control', 'placeholder':'Web Address'}),
 			'email': forms.EmailInput(attrs={'class':'form-control', 'placeholder':'Email'}),
-			'owner': forms.Select(attrs={'class':'form-select', 'placeholder':'Owner'}),
-			'venue_image': forms.FileInput(attrs={'class':'form-control', 'placeholder':'Venue Image'}),
 		}
